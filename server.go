@@ -7,9 +7,9 @@ import (
 	"os"
 	"path/filepath"
 	// "xingo_cluster_demo/admin_server"
-	// "xingo_cluster_demo/game_server"
-	// "xingo_cluster_demo/gate_server"
-	// "xingo_cluster_demo/net_server"
+	"xingo_cluster_demo/game_server"
+	"xingo_cluster_demo/gate_server"
+	_ "xingo_cluster_demo/net_server"
 )
 
 func main() {
@@ -30,9 +30,9 @@ func main() {
 			// //net server
 			// s.AddModule("net", &net_server.TestNetApi{}, nil, &net_server.TestNetRpc{})
 			// //gate server
-			// s.AddModule("gate", nil, nil, &gate_server.TestGateRpc{})
+			s.AddModule("gate", nil, nil, &gate_server.GateRpcApi{})
 			// //admin server
-			// s.AddModule("admin", nil, &admin_server.TestAdminHttp{}, &admin_server.TestAdminRpc{})
+			s.AddModule("game", nil, nil, &game_server.GameRpcApi{})
 
 			s.StartClusterServer()
 		} else {

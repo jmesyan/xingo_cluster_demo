@@ -1,8 +1,17 @@
 package game_server
 
 import (
-	"xingo_cluster_demo_demo/core"
+	"github.com/jmesyan/xingo/cluster"
+	"xingo_cluster_demo/core"
 )
 
-type GameApi struct {
+type GameRpcApi struct {
+}
+
+func (this *GameRpcApi) CreatePlayer(request *cluster.RpcRequest) map[string]interface{} {
+	p, _ := core.WorldMgrObj.AddPlayer()
+	return map[string]interface{}{
+		"pid": p.Pid,
+		// "sname":"game1"Pid
+	}
 }

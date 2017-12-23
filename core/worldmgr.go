@@ -3,7 +3,7 @@ package core
 import (
 	"errors"
 	"github.com/golang/protobuf/proto"
-	"github.com/jmesyan/xingo/iface"
+	// "github.com/jmesyan/xingo/iface"
 	"github.com/jmesyan/xingo/logger"
 	"sync"
 	"xingo_demo/pb"
@@ -26,21 +26,21 @@ func init() {
 	}
 }
 
-func (this *WorldMgr) AddPlayer(fconn iface.Iconnection) (*Player, error) {
+func (this *WorldMgr) AddPlayer() (*Player, error) {
 	this.Lock()
 	this.PlayerNumGen += 1
-	p := NewPlayer(fconn, this.PlayerNumGen)
+	p := NewPlayer(this.PlayerNumGen)
 	this.Players[p.Pid] = p
 	this.Unlock()
-	//同步Pid
-	msg := &pb.SyncPid{
-		Pid: p.Pid,
-	}
-	p.SendMsg(1, msg)
-	//加到aoi
-	this.AoiObj1.Add2AOI(p)
-	//周围的人
-	p.SyncSurrouding()
+	// //同步Pid
+	// msg := &pb.SyncPid{
+	// 	Pid: p.Pid,
+	// }
+	// p.SendMsg(1, msg)
+	// //加到aoi
+	// this.AoiObj1.Add2AOI(p)
+	// //周围的人
+	// p.SyncSurrouding()
 	return p, nil
 }
 
