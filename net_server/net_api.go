@@ -83,10 +83,6 @@ func DoConnectioned(fconn iface.Iconnection) {
 
 }
 
-func init() {
-	utils.GlobalObject.OnConnectioned = DoConnectioned
-}
-
 type NetApiRouter struct {
 }
 

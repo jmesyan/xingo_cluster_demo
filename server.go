@@ -2,14 +2,16 @@ package main
 
 import (
 	"github.com/jmesyan/xingo"
+	"github.com/jmesyan/xingo/utils"
 	_ "net/http"
 	_ "net/http/pprof"
 	"os"
 	"path/filepath"
-	// "xingo_cluster_demo/admin_server"
+	"strings"
+	"xingo_cluster_demo/core"
 	"xingo_cluster_demo/game_server"
 	"xingo_cluster_demo/gate_server"
-	_ "xingo_cluster_demo/net_server"
+	"xingo_cluster_demo/net_server"
 )
 
 func main() {
@@ -23,7 +25,8 @@ func main() {
 	dir, err := filepath.Abs(filepath.Dir("."))
 	if err == nil {
 		if true {
-			s := xingo.NewXingoCluterServer(args[1], filepath.Join(dir, "conf", "clusterconf.json"))
+			sname := args[1]
+			s := xingo.NewXingoCluterServer(sname, filepath.Join(dir, "conf", "clusterconf.json"))
 			/*
 				注册分布式服务器
 			*/
@@ -34,6 +37,13 @@ func main() {
 			// //admin server
 			s.AddModule("game", nil, nil, &game_server.GameRpcApi{})
 
+			if strings.HasPrefix(sname, "game") {
+				core.WorldMgrObjInit()
+			}
+
+			if strings.HasPrefix(sname, "net") {
+				utils.GlobalObject.OnConnectioned = net_server.DoConnectioned
+			}
 			s.StartClusterServer()
 		} else {
 			s := xingo.NewXingoCluterServer(args[1], filepath.Join(dir, "conf", "clusterconf_测试网关有root和http.json"))

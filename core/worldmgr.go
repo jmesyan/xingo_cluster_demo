@@ -18,7 +18,7 @@ type WorldMgr struct {
 
 var WorldMgrObj *WorldMgr
 
-func init() {
+func WorldMgrObjInit() {
 	WorldMgrObj = &WorldMgr{
 		PlayerNumGen: 0,
 		Players:      make(map[int32]*Player),
