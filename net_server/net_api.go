@@ -8,11 +8,13 @@ import (
 	"github.com/jmesyan/xingo/iface"
 	"github.com/jmesyan/xingo/logger"
 	"github.com/jmesyan/xingo/utils"
+	"time"
 	"xingo_cluster_demo/core"
 	"xingo_cluster_demo/pb"
 )
 
 func DoConnectioned(fconn iface.Iconnection) {
+	st := time.Now()
 	logger.Info("connection connect , I get it")
 	//请求pid
 	onegate := clusterserver.GlobalClusterServer.RemoteNodesMgr.GetRandomChild("gate")
@@ -23,7 +25,7 @@ func DoConnectioned(fconn iface.Iconnection) {
 		if err == nil {
 			pid, _ := response.Result["pid"].(int32)
 			if pid > 0 {
-				logger.Info("get pid success")
+				logger.Info("get pid success, pid:", pid)
 				fconn.SetProperty("pid", pid)
 				//同步Pid
 				msg := &pb.SyncPid{
@@ -32,6 +34,8 @@ func DoConnectioned(fconn iface.Iconnection) {
 				packdata, err := utils.GlobalObject.Protoc.GetDataPack().Pack(1, msg)
 				if err == nil {
 					fconn.Send(packdata)
+					diff := time.Now().Sub(st).Nanoseconds()
+					logger.Info("get pid total consume:", (diff / 1e6), "ms")
 				} else {
 					logger.Error("pack data error")
 				}
