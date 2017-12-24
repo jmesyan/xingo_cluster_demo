@@ -8,11 +8,22 @@ import (
 	"github.com/jmesyan/xingo/iface"
 	"github.com/jmesyan/xingo/logger"
 	"github.com/jmesyan/xingo/utils"
+	"math/rand"
 	"time"
 	"xingo_cluster_demo/core"
 	"xingo_cluster_demo/pb"
 )
 
+func SendMsg(fconn iface.Iconnection, msgId uint32, data proto.Message) {
+	if fconn != nil {
+		packdata, err := utils.GlobalObject.Protoc.GetDataPack().Pack(msgId, data)
+		if err == nil {
+			fconn.Send(packdata)
+		} else {
+			logger.Error("pack data error")
+		}
+	}
+}
 func DoConnectioned(fconn iface.Iconnection) {
 	st := time.Now()
 	logger.Info("connection connect , I get it")
@@ -31,14 +42,35 @@ func DoConnectioned(fconn iface.Iconnection) {
 				msg := &pb.SyncPid{
 					Pid: pid,
 				}
-				packdata, err := utils.GlobalObject.Protoc.GetDataPack().Pack(1, msg)
-				if err == nil {
-					fconn.Send(packdata)
-					diff := time.Now().Sub(st).Nanoseconds()
-					logger.Info("get pid total consume:", (diff / 1e6), "ms")
-				} else {
-					logger.Error("pack data error")
+				SendMsg(fconn, 1, msg)
+				position := &pb.Position{
+					X: float32(rand.Intn(10) + 160),
+					Y: 0,
+					Z: float32(rand.Intn(17) + 134),
+					V: 0,
 				}
+
+				//出现在周围人的视野
+				data := &pb.BroadCast{
+					Pid: pid,
+					Tp:  2,
+					Data: &pb.BroadCast_P{
+						P: position,
+					},
+				}
+
+				SendMsg(fconn, 200, data)
+
+				msg2 := &pb.SyncPlayers{}
+				p := &pb.Player{
+					Pid: pid,
+					P:   position,
+				}
+
+				msg2.Ps = append(msg2.Ps, p)
+				SendMsg(fconn, 202, msg2)
+				diff := time.Now().Sub(st).Nanoseconds()
+				logger.Info("get pid total consume:", (diff / 1e6), "ms")
 
 			} else {
 				logger.Info("no game server serve")
