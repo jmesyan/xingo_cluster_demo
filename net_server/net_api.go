@@ -13,6 +13,12 @@ import (
 	"xingo_cluster_demo/pb"
 )
 
+var NetPlayers map[int32]core.Player
+
+func init() {
+	NetPlayers = make(map[int32]core.Player)
+}
+
 func SendMsg(fconn iface.Iconnection, msgId uint32, data proto.Message) {
 	if fconn != nil {
 		packdata, err := utils.GlobalObject.Protoc.GetDataPack().Pack(msgId, data)
@@ -31,10 +37,12 @@ func DoConnectioned(fconn iface.Iconnection) {
 
 	if onegate != nil {
 		logger.Info("chose gate: " + onegate.GetName())
-		response, err := onegate.CallChildForResult("CreatePlayer")
+		response, err := onegate.CallChildForResult("CreatePlayer", utils.GlobalObject.Name)
 		if err == nil {
-			player, _ := response.Result["p"].(core.Player)
-			pid := player.Pid
+			self, _ := response.Result["p"].(core.Player)
+			pid := self.Pid
+			self.Fconn = fconn
+			NetPlayers[pid] = self
 			if pid > 0 {
 				logger.Info("get pid success, pid:", pid)
 				fconn.SetProperty("pid", pid)
@@ -44,13 +52,13 @@ func DoConnectioned(fconn iface.Iconnection) {
 				}
 				SendMsg(fconn, 1, msg)
 				position := &pb.Position{
-					X: player.X,
-					Y: player.Y,
-					Z: player.Z,
-					V: player.V,
+					X: self.X,
+					Y: self.Y,
+					Z: self.Z,
+					V: self.V,
 				}
 
-				//出现在周围人的视野
+				//出现在自己的视野中
 				data := &pb.BroadCast{
 					Pid: pid,
 					Tp:  2,
@@ -61,14 +69,24 @@ func DoConnectioned(fconn iface.Iconnection) {
 
 				SendMsg(fconn, 200, data)
 
-				msg2 := &pb.SyncPlayers{}
-				p := &pb.Player{
-					Pid: pid,
-					P:   position,
+				//同步周围玩家
+				sr, _ := response.Result["sr"].([]core.Player)
+				for _, spy := range sr {
+					msg2 := &pb.SyncPlayers{}
+					p := &pb.Player{
+						Pid: spy.Pid,
+						P: &pb.Position{
+							X: spy.X,
+							Y: spy.Y,
+							Z: spy.Z,
+							V: spy.V,
+						},
+					}
+
+					msg2.Ps = append(msg2.Ps, p)
+					SendMsg(fconn, 202, msg2)
 				}
 
-				msg2.Ps = append(msg2.Ps, p)
-				SendMsg(fconn, 202, msg2)
 				diff := time.Now().Sub(st).Nanoseconds()
 				logger.Info("get pid total consume:", (diff / 1e6), "ms")
 

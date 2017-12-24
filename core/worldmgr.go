@@ -26,19 +26,20 @@ func WorldMgrObjInit() {
 	}
 }
 
-func (this *WorldMgr) AddPlayer() (*Player, error) {
+func (this *WorldMgr) AddPlayer(netname string) (*Player, error) {
 	this.Lock()
 	this.PlayerNumGen += 1
-	p := NewPlayer(this.PlayerNumGen)
+	p := NewPlayer(netname, this.PlayerNumGen)
 	this.Players[p.Pid] = p
 	this.Unlock()
+	this.AoiObj1.Add2AOI(p)
 	// //同步Pid
 	// msg := &pb.SyncPid{
 	// 	Pid: p.Pid,
 	// }
 	// p.SendMsg(1, msg)
 	// //加到aoi
-	// this.AoiObj1.Add2AOI(p)
+	//
 	// //周围的人
 	// p.SyncSurrouding()
 	return p, nil

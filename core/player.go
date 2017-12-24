@@ -3,7 +3,7 @@ package core
 import (
 	"errors"
 	"github.com/golang/protobuf/proto"
-	// "github.com/jmesyan/xingo/iface"
+	"github.com/jmesyan/xingo/iface"
 	"github.com/jmesyan/xingo/logger"
 	// "github.com/jmesyan/xingo/utils"
 	"encoding/gob"
@@ -13,23 +13,28 @@ import (
 
 func init() {
 	gob.Register(Player{})
+	gob.Register([]Player{})
 }
 
 type Player struct {
-	Pid int32
-	X   float32 //平面x
-	Y   float32 //高度
-	Z   float32 //平面y!!!!!注意不是Y
-	V   float32 //旋转0-360度
+	Net   string
+	Fconn iface.Iconnection
+	Pid   int32
+	X     float32 //平面x
+	Y     float32 //高度
+	Z     float32 //平面y!!!!!注意不是Y
+	V     float32 //旋转0-360度
 }
 
-func NewPlayer(pid int32) *Player {
+func NewPlayer(net string, pid int32) *Player {
 	p := &Player{
-		Pid: pid,
-		X:   float32(rand.Intn(10) + 160),
-		Y:   0,
-		Z:   float32(rand.Intn(17) + 134),
-		V:   0,
+		Net:   net,
+		Pid:   pid,
+		X:     float32(rand.Intn(10) + 160),
+		Y:     0,
+		Z:     float32(rand.Intn(17) + 134),
+		V:     0,
+		Fconn: nil,
 	}
 
 	return p

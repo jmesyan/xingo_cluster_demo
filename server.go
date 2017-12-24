@@ -31,7 +31,7 @@ func main() {
 				注册分布式服务器
 			*/
 			// //net server
-			// s.AddModule("net", &net_server.TestNetApi{}, nil, &net_server.TestNetRpc{})
+			s.AddModule("net", &net_server.NetApiRouter{}, nil, &net_server.NetRpcApi{})
 			// //gate server
 			s.AddModule("gate", nil, nil, &gate_server.GateRpcApi{})
 			// //admin server
