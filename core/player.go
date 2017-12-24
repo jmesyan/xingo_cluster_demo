@@ -6,9 +6,14 @@ import (
 	// "github.com/jmesyan/xingo/iface"
 	"github.com/jmesyan/xingo/logger"
 	// "github.com/jmesyan/xingo/utils"
+	"encoding/gob"
 	"math/rand"
 	"xingo_demo/pb"
 )
+
+func init() {
+	gob.Register(Player{})
+}
 
 type Player struct {
 	Pid int32

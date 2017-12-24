@@ -8,7 +8,6 @@ import (
 	"github.com/jmesyan/xingo/iface"
 	"github.com/jmesyan/xingo/logger"
 	"github.com/jmesyan/xingo/utils"
-	"math/rand"
 	"time"
 	"xingo_cluster_demo/core"
 	"xingo_cluster_demo/pb"
@@ -34,7 +33,8 @@ func DoConnectioned(fconn iface.Iconnection) {
 		logger.Info("chose gate: " + onegate.GetName())
 		response, err := onegate.CallChildForResult("CreatePlayer")
 		if err == nil {
-			pid, _ := response.Result["pid"].(int32)
+			player, _ := response.Result["p"].(core.Player)
+			pid := player.Pid
 			if pid > 0 {
 				logger.Info("get pid success, pid:", pid)
 				fconn.SetProperty("pid", pid)
@@ -44,10 +44,10 @@ func DoConnectioned(fconn iface.Iconnection) {
 				}
 				SendMsg(fconn, 1, msg)
 				position := &pb.Position{
-					X: float32(rand.Intn(10) + 160),
-					Y: 0,
-					Z: float32(rand.Intn(17) + 134),
-					V: 0,
+					X: player.X,
+					Y: player.Y,
+					Z: player.Z,
+					V: player.V,
 				}
 
 				//出现在周围人的视野
