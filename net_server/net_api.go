@@ -3,6 +3,7 @@ package net_server
 import (
 	"fmt"
 	"github.com/golang/protobuf/proto"
+	"github.com/jmesyan/xingo/cluster"
 	"github.com/jmesyan/xingo/clusterserver"
 	"github.com/jmesyan/xingo/fnet"
 	"github.com/jmesyan/xingo/iface"
@@ -29,11 +30,26 @@ func SendMsg(fconn iface.Iconnection, msgId uint32, data proto.Message) {
 		}
 	}
 }
+
+func SendBuffMsg(fconn iface.Iconnection, msgId uint32, data proto.Message) {
+	if fconn != nil {
+		packdata, err := utils.GlobalObject.Protoc.GetDataPack().Pack(msgId, data)
+		if err == nil {
+			fconn.SendBuff(packdata)
+		} else {
+			logger.Error("pack data error")
+		}
+	}
+}
+
+func GetRandomGate() *cluster.Child {
+	return clusterserver.GlobalClusterServer.RemoteNodesMgr.GetRandomChild("gate")
+}
 func DoConnectioned(fconn iface.Iconnection) {
 	st := time.Now()
 	logger.Info("connection connect , I get it")
 	//请求pid
-	onegate := clusterserver.GlobalClusterServer.RemoteNodesMgr.GetRandomChild("gate")
+	onegate := GetRandomGate()
 
 	if onegate != nil {
 		logger.Info("chose gate: " + onegate.GetName())
@@ -123,8 +139,19 @@ func (this *NetApiRouter) Api_2(request *fnet.PkgAll) {
 		// pid, err1 := request.Fconn.GetProperty("pid")
 		pid, err1 := request.Fconn.GetProperty("pid")
 		if err1 == nil {
-			p, _ := core.WorldMgrObj.GetPlayer(pid.(int32))
-			p.Talk(msg.Content)
+			data := &pb.BroadCast{
+				Pid: pid.(int32),
+				Tp:  1,
+				Data: &pb.BroadCast_Content{
+					Content: msg.Content,
+				},
+			}
+			onegate := GetRandomGate()
+
+			if onegate != nil {
+				logger.Info("chose gate: " + onegate.GetName())
+				onegate.CallChildNotForResult("BroadCastMsg", 200, data)
+			}
 		} else {
 			logger.Error(err1)
 			request.Fconn.LostConnection()

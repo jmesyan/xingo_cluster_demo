@@ -5,6 +5,7 @@ import (
 	// "github.com/jmesyan/xingo/clusterserver"
 	"github.com/jmesyan/xingo/logger"
 	// "github.com/jmesyan/xingo/utils"
+	"github.com/golang/protobuf/proto"
 	"xingo_cluster_demo/core"
 	"xingo_cluster_demo/pb"
 )
@@ -35,4 +36,15 @@ func (this *NetRpcApi) SyncSurrounds(request *cluster.RpcRequest) {
 		// netname := utils.GlobalObj.Name
 		logger.Info("no player find in net:")
 	}
+}
+
+func (this *NetRpcApi) BroadCastMsg(request *cluster.RpcRequest) {
+	msgId := request.Rpcdata.Args[0].(uint32)
+	data := request.Rpcdata.Args[1].(proto.Message)
+	for _, py := range NetPlayers {
+		if py.Fconn != nil {
+			SendBuffMsg(py.Fconn, msgId, data)
+		}
+	}
+	logger.Info("BroadCastMsg to client")
 }
