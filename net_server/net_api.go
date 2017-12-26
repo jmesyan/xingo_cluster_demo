@@ -139,18 +139,11 @@ func (this *NetApiRouter) Api_2(request *fnet.PkgAll) {
 		// pid, err1 := request.Fconn.GetProperty("pid")
 		pid, err1 := request.Fconn.GetProperty("pid")
 		if err1 == nil {
-			data := &pb.BroadCast{
-				Pid: pid.(int32),
-				Tp:  1,
-				Data: &pb.BroadCast_Content{
-					Content: msg.Content,
-				},
-			}
 			onegate := GetRandomGate()
 
 			if onegate != nil {
 				logger.Info("chose gate: " + onegate.GetName())
-				onegate.CallChildNotForResult("BroadCastMsg", 200, data)
+				onegate.CallChildNotForResult("BroadCastMsg", pid, msg.Content)
 			}
 		} else {
 			logger.Error(err1)

@@ -1,7 +1,7 @@
 package gate_server
 
 import (
-	"github.com/golang/protobuf/proto"
+	// "github.com/golang/protobuf/proto"
 	"github.com/jmesyan/xingo/cluster"
 	"github.com/jmesyan/xingo/clusterserver"
 	"github.com/jmesyan/xingo/logger"
@@ -43,11 +43,11 @@ func (this *GateRpcApi) SyncSurrounds(request *cluster.RpcRequest) {
 }
 
 func (this *GateRpcApi) BroadCastMsg(request *cluster.RpcRequest) {
-	msgId := request.Rpcdata.Args[0].(int32)
-	data := request.Rpcdata.Args[1].(proto.Message)
+	pid := request.Rpcdata.Args[0].(int32)
+	content := request.Rpcdata.Args[1].(string)
 	childs := clusterserver.GlobalClusterServer.ChildsMgr.GetChildsByPrefix("net")
 	for _, net := range childs {
-		net.CallChildNotForResult("BroadCastMsg", msgId, data)
+		net.CallChildNotForResult("BroadCastMsg", pid, content)
 	}
 
 }

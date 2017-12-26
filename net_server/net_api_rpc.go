@@ -5,7 +5,7 @@ import (
 	// "github.com/jmesyan/xingo/clusterserver"
 	"github.com/jmesyan/xingo/logger"
 	// "github.com/jmesyan/xingo/utils"
-	"github.com/golang/protobuf/proto"
+	// "github.com/golang/protobuf/proto"
 	"xingo_cluster_demo/core"
 	"xingo_cluster_demo/pb"
 )
@@ -39,11 +39,19 @@ func (this *NetRpcApi) SyncSurrounds(request *cluster.RpcRequest) {
 }
 
 func (this *NetRpcApi) BroadCastMsg(request *cluster.RpcRequest) {
-	msgId := request.Rpcdata.Args[0].(uint32)
-	data := request.Rpcdata.Args[1].(proto.Message)
+	pid := request.Rpcdata.Args[0].(int32)
+	content := request.Rpcdata.Args[1].(string)
+
+	data := &pb.BroadCast{
+		Pid: pid,
+		Tp:  1,
+		Data: &pb.BroadCast_Content{
+			Content: content,
+		},
+	}
 	for _, py := range NetPlayers {
 		if py.Fconn != nil {
-			SendBuffMsg(py.Fconn, msgId, data)
+			SendBuffMsg(py.Fconn, 200, data)
 		}
 	}
 	logger.Info("BroadCastMsg to client")
