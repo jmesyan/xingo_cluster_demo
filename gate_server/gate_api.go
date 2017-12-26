@@ -6,6 +6,7 @@ import (
 	"github.com/jmesyan/xingo/clusterserver"
 	"github.com/jmesyan/xingo/logger"
 	"xingo_cluster_demo/core"
+	"xingo_cluster_demo/pb"
 )
 
 type GateRpcApi struct {
@@ -50,4 +51,10 @@ func (this *GateRpcApi) BroadCastMsg(request *cluster.RpcRequest) {
 		net.CallChildNotForResult("BroadCastMsg", pid, content)
 	}
 
+}
+
+func (this *GateRpcApi) UpdatePos(request *cluster.RpcRequest) {
+	pid := request.Rpcdata.Args[0].(int32)
+	position := request.Rpcdata.Args[1].(pb.Position)
+	logger.Info(pid, position, "gate updatepos")
 }

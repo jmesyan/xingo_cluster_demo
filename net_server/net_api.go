@@ -136,7 +136,6 @@ func (this *NetApiRouter) Api_2(request *fnet.PkgAll) {
 	err := proto.Unmarshal(request.Pdata.Data, msg)
 	if err == nil {
 		logger.Debug(fmt.Sprintf("user talk: content: %s.", msg.Content))
-		// pid, err1 := request.Fconn.GetProperty("pid")
 		pid, err1 := request.Fconn.GetProperty("pid")
 		if err1 == nil {
 			onegate := GetRandomGate()
@@ -163,8 +162,13 @@ func (this *NetApiRouter) Api_3(request *fnet.PkgAll) {
 		logger.Debug(fmt.Sprintf("user move: (%f, %f, %f, %f)", msg.X, msg.Y, msg.Z, msg.V))
 		pid, err1 := request.Fconn.GetProperty("pid")
 		if err1 == nil {
-			p, _ := core.WorldMgrObj.GetPlayer(pid.(int32))
-			p.UpdatePos(msg.X, msg.Y, msg.Z, msg.V)
+			// p, _ := core.WorldMgrObj.GetPlayer(pid.(int32))
+			// p.UpdatePos(msg.X, msg.Y, msg.Z, msg.V)
+			onegate := GetRandomGate()
+			if onegate != nil {
+				logger.Info("chose gate: " + onegate.GetName())
+				onegate.CallChildNotForResult("UpdatePos", pid, msg)
+			}
 		} else {
 			logger.Error(err1)
 			request.Fconn.LostConnection()

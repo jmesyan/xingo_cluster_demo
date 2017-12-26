@@ -1,11 +1,11 @@
 package pb
 
 import (
-// "encoding/gob"
+	"encoding/gob"
 )
 
 func init() {
-	// gob.Register(BroadCast{})
+	gob.Register(Position{})
 	// gob.Register(BroadCast_Content{})
 	// gob.Register(isBroadCast_Data{})
 }
