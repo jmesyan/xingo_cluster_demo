@@ -15,10 +15,6 @@ import (
 )
 
 func main() {
-	//pprof
-	//go func() {
-	//	println(http.ListenAndServe("localhost:6060", nil))
-	//}()
 
 	//server code
 	args := os.Args

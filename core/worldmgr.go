@@ -6,7 +6,8 @@ import (
 	"github.com/jmesyan/xingo/logger"
 	// "github.com/jmesyan/xingo/utils"
 	"sync"
-	"xingo_demo/pb"
+	// "xingo_demo/pb"
+	"github.com/jmesyan/xingo/clusterserver"
 )
 
 type WorldMgr struct {
@@ -54,26 +55,14 @@ func (this *WorldMgr) RemovePlayer(pid int32) {
 }
 
 func (this *WorldMgr) Move(p *Player) {
-	var data *pb.BroadCast
-	data = &pb.BroadCast{
-		Pid: p.Pid,
-		Tp:  4,
-		Data: &pb.BroadCast_P{
-			P: &pb.Position{
-				X: p.X,
-				Y: p.Y,
-				Z: p.Z,
-				V: p.V,
-			},
-		},
-	}
+	onegate := clusterserver.GlobalClusterServer.RemoteNodesMgr.GetRandomChild("gate")
 	/*aoi*/
 	pids, err := this.AoiObj1.GetSurroundingPids(p)
 	if err == nil {
 		for _, pid := range pids {
 			player, err1 := this.GetPlayer(pid)
 			if err1 == nil {
-				player.SendMsg(200, data)
+				go SyncSurrounds(onegate, 211, *player, *p)
 			}
 		}
 	}

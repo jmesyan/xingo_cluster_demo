@@ -32,11 +32,12 @@ func (this *GateRpcApi) CreatePlayer(request *cluster.RpcRequest) map[string]int
 }
 
 func (this *GateRpcApi) SyncSurrounds(request *cluster.RpcRequest) {
-	py, np := request.Rpcdata.Args[0].(core.Player), request.Rpcdata.Args[1].(core.Player)
+	cmd := request.Rpcdata.Args[0].(int32)
+	py, np := request.Rpcdata.Args[1].(core.Player), request.Rpcdata.Args[2].(core.Player)
 	netname := py.Net
 	net, err := clusterserver.GlobalClusterServer.ChildsMgr.GetChild(netname)
 	if err == nil {
-		net.CallChildNotForResult("SyncSurrounds", py, np)
+		net.CallChildNotForResult("SyncSurrounds", cmd, py, np)
 	} else {
 		logger.Error("can not found the net")
 	}
@@ -57,4 +58,10 @@ func (this *GateRpcApi) UpdatePos(request *cluster.RpcRequest) {
 	pid := request.Rpcdata.Args[0].(int32)
 	position := request.Rpcdata.Args[1].(pb.Position)
 	logger.Info(pid, position, "gate updatepos")
+	onegame := clusterserver.GlobalClusterServer.ChildsMgr.GetRandomChild("game")
+	logger.Info("onegame", onegame)
+	if onegame != nil {
+		onegame.CallChildNotForResult("UpdatePos", pid, position)
+	}
+	logger.Info("gate_api", "no game server online")
 }

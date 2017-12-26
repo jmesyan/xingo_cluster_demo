@@ -3,8 +3,6 @@ package net_server
 import (
 	"fmt"
 	"github.com/golang/protobuf/proto"
-	"github.com/jmesyan/xingo/cluster"
-	"github.com/jmesyan/xingo/clusterserver"
 	"github.com/jmesyan/xingo/fnet"
 	"github.com/jmesyan/xingo/iface"
 	"github.com/jmesyan/xingo/logger"
@@ -14,37 +12,6 @@ import (
 	"xingo_cluster_demo/pb"
 )
 
-var NetPlayers map[int32]core.Player
-
-func init() {
-	NetPlayers = make(map[int32]core.Player)
-}
-
-func SendMsg(fconn iface.Iconnection, msgId uint32, data proto.Message) {
-	if fconn != nil {
-		packdata, err := utils.GlobalObject.Protoc.GetDataPack().Pack(msgId, data)
-		if err == nil {
-			fconn.Send(packdata)
-		} else {
-			logger.Error("pack data error")
-		}
-	}
-}
-
-func SendBuffMsg(fconn iface.Iconnection, msgId uint32, data proto.Message) {
-	if fconn != nil {
-		packdata, err := utils.GlobalObject.Protoc.GetDataPack().Pack(msgId, data)
-		if err == nil {
-			fconn.SendBuff(packdata)
-		} else {
-			logger.Error("pack data error")
-		}
-	}
-}
-
-func GetRandomGate() *cluster.Child {
-	return clusterserver.GlobalClusterServer.RemoteNodesMgr.GetRandomChild("gate")
-}
 func DoConnectioned(fconn iface.Iconnection) {
 	st := time.Now()
 	logger.Info("connection connect , I get it")
@@ -122,7 +89,6 @@ type NetApiRouter struct {
 
 func (this *NetApiRouter) Api_0(request *fnet.PkgAll) {
 	logger.Debug("call Api_0")
-	// request.Fconn.SendBuff(0, nil)
 	packdata, err := utils.GlobalObject.Protoc.GetDataPack().Pack(0, nil)
 	if err == nil {
 		request.Fconn.Send(packdata)
@@ -162,8 +128,6 @@ func (this *NetApiRouter) Api_3(request *fnet.PkgAll) {
 		logger.Debug(fmt.Sprintf("user move: (%f, %f, %f, %f)", msg.X, msg.Y, msg.Z, msg.V))
 		pid, err1 := request.Fconn.GetProperty("pid")
 		if err1 == nil {
-			// p, _ := core.WorldMgrObj.GetPlayer(pid.(int32))
-			// p.UpdatePos(msg.X, msg.Y, msg.Z, msg.V)
 			onegate := GetRandomGate()
 			if onegate != nil {
 				logger.Info("chose gate: " + onegate.GetName())

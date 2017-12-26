@@ -1,12 +1,13 @@
 package core
 
 import (
+	"encoding/gob"
 	"errors"
 	"github.com/golang/protobuf/proto"
+	"github.com/jmesyan/xingo/cluster"
+	"github.com/jmesyan/xingo/clusterserver"
 	"github.com/jmesyan/xingo/iface"
 	"github.com/jmesyan/xingo/logger"
-	// "github.com/jmesyan/xingo/utils"
-	"encoding/gob"
 	"math/rand"
 	"xingo_demo/pb"
 )
@@ -40,24 +41,14 @@ func NewPlayer(net string, pid int32) *Player {
 	return p
 }
 
+func SyncSurrounds(gate *cluster.Child, cmd int32, py, np Player) {
+	gate.CallChildNotForResult("SyncSurrounds", cmd, py, np)
+}
+
 /*
 同步周围玩家
 */
 func (this *Player) SyncSurrouding() {
-	/*暂时取全部, 等aoi模块完成*/
-	//for pid, player := range WorldMgrObj.Players{
-	//	p := &pb.Player{
-	//		Pid: pid,
-	//		P: &pb.Position{
-	//			X: player.X,
-	//			Y: player.Y,
-	//			Z: player.Z,
-	//			V: player.V,
-	//		},
-	//	}
-	//	msg.Ps = append(msg.Ps, p)
-	//}
-	/*aoi*/
 	pids, err := WorldMgrObj.AoiObj1.GetSurroundingPids(this)
 
 	if err == nil {
@@ -167,39 +158,20 @@ func (this *Player) OnExchangeAoiGrid(oldGridId int32, newGridId int32) error {
 		}
 	}
 
+	onegate := clusterserver.GlobalClusterServer.RemoteNodesMgr.GetRandomChild("gate")
+	if onegate == nil {
+		return errors.New("can not found gate")
+	}
+
 	for gid, grid := range union {
 		//出生
 		if _, ok := oldAoiGridsMap[gid]; ok != true {
-			data := &pb.BroadCast{
-				Pid: this.Pid,
-				Tp:  2,
-				Data: &pb.BroadCast_P{
-					P: &pb.Position{
-						X: this.X,
-						Y: this.Y,
-						Z: this.Z,
-						V: this.V,
-					},
-				},
-			}
 			for _, pid := range grid.GetPids() {
 				if pid != this.Pid {
 					p, err := WorldMgrObj.GetPlayer(pid)
 					if err == nil {
-						pdata := &pb.BroadCast{
-							Pid: p.Pid,
-							Tp:  2,
-							Data: &pb.BroadCast_P{
-								P: &pb.Position{
-									X: p.X,
-									Y: p.Y,
-									Z: p.Z,
-									V: p.V,
-								},
-							},
-						}
-						p.SendMsg(200, data)
-						this.SendMsg(200, pdata)
+						go SyncSurrounds(onegate, 200, *p, *this)
+						go SyncSurrounds(onegate, 200, *this, *p)
 					}
 				}
 
@@ -207,18 +179,12 @@ func (this *Player) OnExchangeAoiGrid(oldGridId int32, newGridId int32) error {
 		}
 		if _, ok := newAoiGridsMap[gid]; ok != true {
 			//消失
-			data := &pb.SyncPid{
-				Pid: this.Pid,
-			}
 			for _, pid := range grid.GetPids() {
 				if pid != this.Pid {
 					p, err := WorldMgrObj.GetPlayer(pid)
 					if err == nil {
-						pdata := &pb.SyncPid{
-							Pid: p.Pid,
-						}
-						p.SendMsg(201, data)
-						this.SendMsg(201, pdata)
+						go SyncSurrounds(onegate, 201, *p, *this)
+						go SyncSurrounds(onegate, 201, *this, *p)
 					}
 				}
 			}

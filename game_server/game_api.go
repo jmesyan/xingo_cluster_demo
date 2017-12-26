@@ -5,13 +5,10 @@ import (
 	"github.com/jmesyan/xingo/clusterserver"
 	"github.com/jmesyan/xingo/logger"
 	"xingo_cluster_demo/core"
+	"xingo_cluster_demo/pb"
 )
 
 type GameRpcApi struct {
-}
-
-func syncSurrounds(gate *cluster.Child, py, np core.Player) {
-	gate.CallChildNotForResult("SyncSurrounds", py, np)
 }
 
 func (this *GameRpcApi) CreatePlayer(request *cluster.RpcRequest) map[string]interface{} {
@@ -29,7 +26,7 @@ func (this *GameRpcApi) CreatePlayer(request *cluster.RpcRequest) map[string]int
 					//给surrounds发送同步消息
 					if onegate != nil {
 						logger.Info("chose gate: " + onegate.GetName())
-						go syncSurrounds(onegate, *py, *p)
+						go SyncSurrounds(onegate, 200, *py, *p)
 					}
 
 				}
@@ -42,6 +39,12 @@ func (this *GameRpcApi) CreatePlayer(request *cluster.RpcRequest) map[string]int
 	return map[string]interface{}{
 		"p":  p,
 		"sr": surrounds,
-		// "sname":"game1"Pid
 	}
+}
+
+func (this *GameRpcApi) UpdatePos(request *cluster.RpcRequest) {
+	pid := request.Rpcdata.Args[0].(int32)
+	ps := request.Rpcdata.Args[1].(pb.Position)
+	p, _ := core.WorldMgrObj.GetPlayer(pid)
+	p.UpdatePos(ps.X, ps.Y, ps.Z, ps.V)
 }

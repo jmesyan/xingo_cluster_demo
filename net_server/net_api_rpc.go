@@ -14,27 +14,68 @@ type NetRpcApi struct {
 }
 
 func (this *NetRpcApi) SyncSurrounds(request *cluster.RpcRequest) {
-	py, np := request.Rpcdata.Args[0].(core.Player), request.Rpcdata.Args[1].(core.Player)
-	if p, ok := NetPlayers[py.Pid]; ok {
-		position := &pb.Position{
-			X: np.X,
-			Y: np.Y,
-			Z: np.Z,
-			V: np.V,
-		}
-		//出现在自己的视野中
-		data := &pb.BroadCast{
-			Pid: np.Pid,
-			Tp:  2,
-			Data: &pb.BroadCast_P{
-				P: position,
-			},
-		}
+	cmd := request.Rpcdata.Args[0].(int32)
+	py, np := request.Rpcdata.Args[1].(core.Player), request.Rpcdata.Args[2].(core.Player)
+	SyncPosition(py)
+	SyncPosition(np)
+	if cmd == 200 {
+		if p, ok := NetPlayers[py.Pid]; ok {
+			position := &pb.Position{
+				X: np.X,
+				Y: np.Y,
+				Z: np.Z,
+				V: np.V,
+			}
+			//出现在自己的视野中
+			data := &pb.BroadCast{
+				Pid: np.Pid,
+				Tp:  2,
+				Data: &pb.BroadCast_P{
+					P: position,
+				},
+			}
 
-		SendMsg(p.Fconn, 200, data)
-	} else {
-		// netname := utils.GlobalObj.Name
-		logger.Info("no player find in net:")
+			SendMsg(p.Fconn, 200, data)
+		} else {
+			// netname := utils.GlobalObj.Name
+			logger.Info("no player find in net:")
+		}
+	}
+
+	if cmd == 201 {
+		if p, ok := NetPlayers[py.Pid]; ok {
+			data := &pb.SyncPid{
+				Pid: np.Pid,
+			}
+			SendMsg(p.Fconn, 201, data)
+		} else {
+			// netname := utils.GlobalObj.Name
+			logger.Info("no player find in net:")
+		}
+	}
+
+	if cmd == 211 {
+		if p, ok := NetPlayers[py.Pid]; ok {
+			position := &pb.Position{
+				X: np.X,
+				Y: np.Y,
+				Z: np.Z,
+				V: np.V,
+			}
+			//出现在自己的视野中
+			data := &pb.BroadCast{
+				Pid: np.Pid,
+				Tp:  4,
+				Data: &pb.BroadCast_P{
+					P: position,
+				},
+			}
+
+			SendMsg(p.Fconn, 200, data)
+		} else {
+			// netname := utils.GlobalObj.Name
+			logger.Info("no player find in net:")
+		}
 	}
 }
 
