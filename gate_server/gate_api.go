@@ -24,8 +24,9 @@ func (this *GateRpcApi) CreatePlayer(request *cluster.RpcRequest) map[string]int
 		} else {
 			logger.Error(err)
 		}
+	} else {
+		logger.Info("gate_api", "no game server online")
 	}
-	logger.Info("gate_api", "no game server online")
 	return map[string]interface{}{
 		"pid": 0,
 	}
@@ -62,6 +63,7 @@ func (this *GateRpcApi) UpdatePos(request *cluster.RpcRequest) {
 	logger.Info("onegame", onegame)
 	if onegame != nil {
 		onegame.CallChildNotForResult("UpdatePos", pid, position)
+	} else {
+		logger.Info("gate_api", "no game server online")
 	}
-	logger.Info("gate_api", "no game server online")
 }

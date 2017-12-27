@@ -3,7 +3,6 @@ package game_server
 import (
 	"github.com/jmesyan/xingo/cluster"
 	"github.com/jmesyan/xingo/clusterserver"
-	"github.com/jmesyan/xingo/logger"
 	"xingo_cluster_demo/core"
 	"xingo_cluster_demo/pb"
 )
