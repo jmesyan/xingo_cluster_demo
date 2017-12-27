@@ -6,4 +6,4 @@
 - go build server.go
 - 编辑 Profile文件
 - 启动集群：goreman start
--unity3d/bin中unity 客戶端連接
+- unity3d/bin中unity 客戶端連接
