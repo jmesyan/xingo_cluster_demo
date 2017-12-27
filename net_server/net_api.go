@@ -19,7 +19,6 @@ func DoConnectioned(fconn iface.Iconnection) {
 	onegate := GetRandomGate()
 
 	if onegate != nil {
-		logger.Info("chose gate: " + onegate.GetName())
 		response, err := onegate.CallChildForResult("CreatePlayer", utils.GlobalObject.Name)
 		if err == nil {
 			self, _ := response.Result["p"].(core.Player)
@@ -107,7 +106,6 @@ func (this *NetApiRouter) Api_2(request *fnet.PkgAll) {
 			onegate := GetRandomGate()
 
 			if onegate != nil {
-				logger.Info("chose gate: " + onegate.GetName())
 				onegate.CallChildNotForResult("BroadCastMsg", pid, msg.Content)
 			}
 		} else {
@@ -130,7 +128,6 @@ func (this *NetApiRouter) Api_3(request *fnet.PkgAll) {
 		if err1 == nil {
 			onegate := GetRandomGate()
 			if onegate != nil {
-				logger.Info("chose gate: " + onegate.GetName())
 				onegate.CallChildNotForResult("UpdatePos", pid, msg)
 			}
 		} else {

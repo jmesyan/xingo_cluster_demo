@@ -25,7 +25,6 @@ func (this *GameRpcApi) CreatePlayer(request *cluster.RpcRequest) map[string]int
 					surrounds = append(surrounds, *py)
 					//给surrounds发送同步消息
 					if onegate != nil {
-						logger.Info("chose gate: " + onegate.GetName())
 						go SyncSurrounds(onegate, 200, *py, *p)
 					}
 
