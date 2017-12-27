@@ -53,8 +53,8 @@ func DoConnectioned(fconn iface.Iconnection) {
 
 				//同步周围玩家
 				sr, _ := response.Result["sr"].([]core.Player)
+				msg2 := &pb.SyncPlayers{}
 				for _, spy := range sr {
-					msg2 := &pb.SyncPlayers{}
 					p := &pb.Player{
 						Pid: spy.Pid,
 						P: &pb.Position{
@@ -66,8 +66,9 @@ func DoConnectioned(fconn iface.Iconnection) {
 					}
 
 					msg2.Ps = append(msg2.Ps, p)
-					SendMsg(fconn, 202, msg2)
 				}
+			 	logger.Info("需要同步的周围玩家", sr, 202, msg2)
+				SendMsg(fconn, 202, msg2)
 
 				diff := time.Now().Sub(st).Nanoseconds()
 				logger.Info("get pid total consume:", (diff / 1e6), "ms")

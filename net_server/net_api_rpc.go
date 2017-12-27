@@ -16,7 +16,7 @@ type NetRpcApi struct {
 func (this *NetRpcApi) SyncSurrounds(request *cluster.RpcRequest) {
 	cmd := request.Rpcdata.Args[0].(int32)
 	py, np := request.Rpcdata.Args[1].(core.Player), request.Rpcdata.Args[2].(core.Player)
-	logger.Info("SyncSurrounds", cmd, py, np, NetPlayers)
+	logger.Info("SyncSurrounds", cmd, py, np)
 	SyncPosition(py)
 	SyncPosition(np)
 	if cmd == 200 {

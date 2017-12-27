@@ -5,6 +5,7 @@ import (
 	"github.com/jmesyan/xingo/clusterserver"
 	"xingo_cluster_demo/core"
 	"xingo_cluster_demo/pb"
+	"github.com/jmesyan/xingo/logger"
 )
 
 type GameRpcApi struct {
@@ -24,6 +25,7 @@ func (this *GameRpcApi) CreatePlayer(request *cluster.RpcRequest) map[string]int
 					surrounds = append(surrounds, *py)
 					//给surrounds发送同步消息
 					if onegate != nil {
+						logger.Info(200, py, p)
 						go SyncSurrounds(onegate, 200, *py, *p)
 					}
 
