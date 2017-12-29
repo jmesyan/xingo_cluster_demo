@@ -207,11 +207,11 @@ func (this *AOIMgr) GetSurroundingByGridId(gridId int32) ([]*Grid, error) {
 		}
 
 		for _, p := range pos {
-			if p/this.lenX > 0 || (p > 0 && p/this.lenX == 0) {
+			if p/this.lenX > 0 {
 				//有下面的格子
 				grids = append(grids, this.grids[p-this.lenX])
 			}
-			if p/this.lenX <= this.lenX-1 {
+			if p/this.lenX <= this.lenY-1 {
 				//有上面的格子
 				grids = append(grids, this.grids[p+this.lenX])
 			}
