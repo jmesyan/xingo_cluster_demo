@@ -7,3 +7,4 @@
 - 编辑 Profile文件
 - 启动集群：goreman start
 - unity3d/bin中unity 客戶端連接
+- 浏览器打开地址查看web：http://localhost:8888/admin/monitor/hello

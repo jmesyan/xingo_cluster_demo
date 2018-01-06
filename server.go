@@ -12,6 +12,7 @@ import (
 	"xingo_cluster_demo/game_server"
 	"xingo_cluster_demo/gate_server"
 	"xingo_cluster_demo/net_server"
+	"xingo_cluster_demo/web_server"
 )
 
 func main() {
@@ -30,8 +31,10 @@ func main() {
 			s.AddModule("net", &net_server.NetApiRouter{}, nil, &net_server.NetRpcApi{})
 			// //gate server
 			s.AddModule("gate", nil, nil, &gate_server.GateRpcApi{})
-			// //admin server
+			//game server
 			s.AddModule("game", nil, nil, &game_server.GameRpcApi{})
+			//web server
+			s.AddModule("web", nil, &web_server.WebApi{}, nil)
 
 			if strings.HasPrefix(sname, "game") {
 				core.WorldMgrObjInit()
