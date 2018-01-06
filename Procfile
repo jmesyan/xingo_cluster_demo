@@ -6,3 +6,4 @@ net1: go run server.go net1
 net2: go run server.go net2
 net3: go run server.go net3
 net4: go run server.go net4
+web1: go run server.go web1
