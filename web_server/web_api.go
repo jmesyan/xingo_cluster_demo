@@ -8,6 +8,7 @@ import (
 	"github.com/jmesyan/xingo/logger"
 	"github.com/urfave/negroni"
 	"net/http"
+	"strings"
 )
 
 type WebApi struct {
@@ -24,6 +25,19 @@ func NegroniWrap(h negroni.HandlerFunc) func(w http.ResponseWriter, r *http.Requ
 	}
 }
 
+func adminAuthCheck(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		session := sessions.GetSession(r)
+		username := session.Get("hello")
+		req := r.URL.String()
+		if strings.Index(req, "admin/monitor/setSession") == -1 && username == nil {
+			http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
 func (this *WebApi) Ready(r *lion.Router) {
 	nh := http.HandlerFunc(NotFound)
 	lion.WithNotFoundHandler(nh)(r)
@@ -31,6 +45,7 @@ func (this *WebApi) Ready(r *lion.Router) {
 	session := sessions.Sessions("my_session", store)
 	admin := r.Group("/admin")
 	admin.UseNext(NegroniWrap(session))
+	admin.UseFunc(adminAuthCheck)
 	admin.Mount("/monitor", Monitor)
 	api := r.Group("/api")
 	api.Mount("/sess", Api)
